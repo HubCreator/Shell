@@ -16,7 +16,7 @@ int main() {
     int amper = -1;
     int child, pid1, pid2, status;
     char *splitted;
-    int i, fd, fd_pipe[2];
+    int index, fd, fd_pipe[2];
 
     while(1) {
         printf("$ "); // prompt 띄우기
@@ -36,27 +36,31 @@ int main() {
         }
         fd = -1;
         amper = -1;
-        // dup2(STD_IN, STD_IN);
-        // dup2(STD_OUT, STD_OUT);
         
         // ################################################################
         
         // background 처리
         if(strchr(str, '&') != NULL) { // background process일 때
             amper = 1;
+            for(int i = 0; i < strlen(str); i++) {
+                if(str[i] == '&') {
+                    // str[i-1] = NULL;
+                    str[i] = NULL;
+                }
+            }
         } else {
             amper = 0;
         }
 
         if((pid1 = fork()) == 0) { // 자식 - 실제 명령어 처리 부분
-            i = 0;
+            index = 0;
             splitted = strtok(str, " ");
             while (splitted != NULL) {  // 명령어 처리 (띄어쓰기 단위로 split)
-                command[i] = splitted; // 각 인덱스에 명령어를 분리해서 저장
+                command[index] = splitted; // 각 인덱스에 명령어를 분리해서 저장
                 splitted = strtok(NULL, " ");
-                i++;
+                index++;
             }
-            command[i] = NULL;
+            command[index] = NULL;
 
             // TODO : redirection 처리
             for(int i = 0; i < strlen(command); i++) {
@@ -122,7 +126,9 @@ int main() {
             printf("execvp error!\n");
             exit(1);
         } else if(pid1 > 0) { // 부모
-            child = wait(&status); // 자식 프로세스를 기다림
+            if(amper == 0) { // background 프로세스 처리가 아니라면 자식을 기다림
+                child = wait(&status);
+            } 
         } else {
             printf("error occured");
         }
