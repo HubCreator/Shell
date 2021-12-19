@@ -80,7 +80,7 @@ int main() {
                 } 
                 // input redirection 
                 else if (strchr(command[i], '<') != NULL) {
-                    fd = open(command[i+1], O_RDONLY);
+                    fd = open(command[i+1], O_RDWR);
                     close(STD_IN);
                     dup(fd);
                     close(fd);
